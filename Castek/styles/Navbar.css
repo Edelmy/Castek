@@ -1,0 +1,121 @@
+@import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@500;600;700&family=Cormorant+Garamond:wght@400;500;600;700&display=swap');
+
+:root {
+    --cafe: #A65E43;
+    --rojo: #A52A2A;
+    --beige: #F0DCC7;
+}
+
+/* ---------- GLOBAL ---------- */
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+    min-height: 100vh;
+    background: #F5E9DE;
+    font-family: 'Cormorant Garamond', serif;
+}
+
+img { display: block; max-width: 100%; }
+a { color: inherit; text-decoration: none; }
+button { background: none; cursor: pointer; }
+button, input, select { font: inherit; border: none; }
+
+input, select {
+    background: white;
+    border-radius: 20px;
+    padding: 5px 12px;
+    text-align: center;
+    outline: none;
+}
+
+/* Botón rojo reutilizable (Agregar, Seleccionado, Realizar pedido, Guardar...) */
+.boton {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 6px 16px;
+    border-radius: 20px;
+    background: var(--rojo);
+    color: white;
+    font-weight: 600;
+    transition: filter 0.2s;
+}
+.boton:hover { filter: brightness(0.8); }
+.boton img { width: 20px; height: 20px; object-fit: contain; filter: brightness(0) invert(1); }
+
+/* Tablas */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    border: 1px solid black;
+    font-size: 14px;
+}
+th, td { padding: 6px 8px; text-align: center; border-right: 1px solid black; }
+th { border-bottom: 1px solid black; font-weight: 500; }
+:is(th, td):last-child { border-right: none; }
+.relleno { height: 120px; }
+
+/* ---------- BARRA CAFÉ ---------- */
+
+.barra-cafe {
+    height: 32px;
+    padding: 0 12px;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 20px;
+    background: var(--cafe);
+    color: white;
+    font-size: 15px;
+}
+.barra-cafe button { display: flex; align-items: center; gap: 5px; color: inherit; }
+.barra-cafe img { width: 22px; height: 22px; object-fit: contain; }
+
+/* ---------- BARRA BEIGE ---------- */
+
+.barra-menu {
+    height: 39px;
+    padding: 0 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--beige);
+}
+
+.logo { font-size: 23px; white-space: nowrap; }
+.logo i { font-family: 'Dancing Script', cursive; font-style: normal; }
+
+.barra-menu div { display: flex; gap: 25px; height: 100%; }
+
+.barra-menu div a {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    font-size: 15px;
+}
+
+.barra-menu div a::after {
+    content: "";
+    position: absolute;
+    bottom: 5px;
+    left: 0;
+    width: 0;
+    height: 1px;
+    background: black;
+    transition: width 0.3s;
+}
+.barra-menu div a.active::after { width: 100%; }
+
+.barra-menu img { width: 18px; height: 18px; object-fit: contain; }
+.barra-menu > a { display: flex; }
+.barra-menu > a img { width: 27px; height: 27px; }
+
+@media (max-width: 650px) {
+    .logo { font-size: 17px; }
+    .barra-menu div { gap: 10px; }
+    .barra-menu div a { font-size: 12px; }
+    .barra-menu div img { width: 15px; height: 15px; }
+}

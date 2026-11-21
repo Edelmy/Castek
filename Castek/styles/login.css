@@ -1,0 +1,17 @@
+/* El diseño del login (tarjeta, avatar, tamaños) está en registro.css: lo comparten
+   Registro, Historial y Login. Aquí solo van el mensaje de error y el panel provisional. */
+
+.login .error {
+    color: var(--rojo);
+    font-weight: 600;
+    text-align: center;
+}
+
+/* Panel provisional del Administrador */
+.panel {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+    padding: 60px 20px;
+}

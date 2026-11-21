@@ -1,0 +1,98 @@
+.vendedor { min-height: 100vh; display: flex; flex-direction: column; }
+
+/* Barra café con el título */
+.vendedor > header {
+    height: 40px;
+    padding: 0 15px;
+    display: flex;
+    align-items: center;
+    background: var(--cafe);
+    color: white;
+}
+.vendedor h1 { font-size: 20px; }
+.vendedor .barra-menu img { width: 30px; height: 30px; }
+
+/* Menú lateral */
+.cuerpo { flex: 1; display: grid; grid-template-columns: 95px 1fr; }
+.cuerpo main { padding: 15px 20px; }
+
+.cuerpo aside {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 25px;
+    padding: 20px 6px;
+    background: #E8C9B5;
+}
+.cuerpo aside a:not(.boton) {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: 6px;
+    border-radius: 10px;
+    text-align: center;
+    font-size: 14px;
+}
+.cuerpo aside a.active { background: #F5E9DE; font-weight: 600; }
+.cuerpo aside a img { width: 42px; height: 42px; object-fit: contain; }
+.cuerpo aside .boton { margin-top: auto; padding: 5px 10px; background: var(--cafe); font-size: 12px; }
+
+/* Registrar compra */
+.venta { display: grid; grid-template-columns: 1fr 300px; gap: 20px; align-items: start; }
+
+.productos {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 18px;
+}
+.vendedor .tarjeta footer b { color: #8B1A1A; letter-spacing: 1px; }
+
+/* Panel de la venta */
+.resumen {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 20px 16px;
+    background: #E8C9B5;
+    border-radius: 14px;
+    font-size: 17px;
+}
+.resumen label { display: flex; flex-direction: column; gap: 4px; }
+.resumen input, .resumen textarea {
+    width: 100%;
+    padding: 8px 14px;
+    border-radius: 16px;
+    background: white;
+    font-size: 16px;
+    text-align: left;
+    resize: vertical;
+}
+.resumen ul { min-height: 60px; list-style: none; display: flex; flex-direction: column; gap: 4px; }
+.resumen li button { margin-left: 6px; color: #E8383D; }
+
+/* Total y Cambio: etiqueta a la izquierda, monto grande a la derecha */
+.resumen p:has(b) { display: flex; justify-content: space-between; align-items: baseline; font-size: 19px; }
+.resumen p b { font-size: 24px; color: var(--rojo); }
+.resumen small { color: #8B1A1A; font-size: 15px; }
+.resumen .boton { align-self: center; margin-top: 6px; font-size: 17px; }
+
+/* Pedidos */
+.filtros { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 15px; }
+.filtros button { padding: 5px 14px; border-radius: 20px; background: #E8C9B5; font-size: 14px; }
+.filtros button.activo { background: var(--cafe); color: white; }
+
+.cuerpo table {
+    background: #FFF5EA;
+    border: 1px solid var(--cafe);
+    border-radius: 12px;
+    border-collapse: separate;
+    border-spacing: 0;
+    overflow: hidden;
+}
+.cuerpo :is(th, td) { border-color: var(--cafe); }
+.cuerpo th { padding: 8px; background: #E8C9B5; color: #5a2d1c; font-weight: 600; }
+
+@media (max-width: 800px) {
+    .venta { grid-template-columns: 1fr; }
+}

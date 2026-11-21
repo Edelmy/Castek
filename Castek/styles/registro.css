@@ -1,0 +1,63 @@
+/* Tarjeta de perfil */
+.perfil {
+    position: relative;
+    width: 270px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 45px 20px 18px;
+    background: #FFF5EA;
+    border: 1px solid #D9A48F;
+    border-radius: 50% 50% 8px 8px / 70px 70px 8px 8px;
+}
+
+.perfil svg {
+    position: absolute;
+    top: -24px;
+    left: 50%;
+    width: 50px;
+    translate: -50% 0;
+}
+
+.perfil label {
+    display: grid;
+    grid-template-columns: 85px 1fr;
+    align-items: center;
+    font-size: 15px;
+}
+
+.perfil .boton { align-self: center; background: var(--cafe); }
+
+/* Página de registro */
+.registro {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    padding: 45px 10px 30px;
+}
+
+.registro .perfil { width: 330px; }
+
+
+.login .perfil {
+    width: 440px;
+    gap: 22px;
+    padding: 75px 40px 30px;
+    border-radius: 50% 50% 10px 10px / 100px 100px 10px 10px;
+}
+.login .perfil svg { width: 76px; top: -38px; }
+.login .perfil label { grid-template-columns: 150px 1fr; font-size: 21px; }
+.login .perfil input { padding: 9px 16px; font-size: 18px; }
+.login .perfil .boton { padding: 9px 32px; font-size: 19px; }
+.login > img { max-width: 900px; }
+
+@media (max-width: 650px) {
+    .login .perfil { width: 100%; }
+    .login .perfil label { grid-template-columns: 1fr; font-size: 18px; }
+}
+
+.registro > img {
+    width: 100%;
+    max-width: 800px;
+}

@@ -1,0 +1,54 @@
+.lista {
+    display: flex;
+    gap: 18px;
+    padding: 30px 40px 15px;
+    overflow-x: auto;
+}
+
+/* Tarjeta */
+.tarjeta {
+    position: relative;
+    flex: 0 0 165px;
+    align-self: flex-start;
+    padding-bottom: 10px;
+    background: #FFF5EA;
+    border-radius: 3px;
+    text-align: center;
+}
+
+.tarjeta > img { width: 100%; height: 115px; object-fit: cover; }
+.tarjeta h3 { margin: 8px 4px 4px; font-size: 14px; font-weight: 500; }
+.tarjeta p { margin-bottom: 8px; color: #8B1A1A; font-size: 15px; }
+
+/* Corazón: vacío por defecto, rojo cuando aria-pressed="true" */
+.tarjeta > button {
+    position: absolute;
+    top: -12px;
+    left: -12px;
+    width: 38px;
+    height: 38px;
+    transition: transform 0.15s;
+}
+.tarjeta > button:hover { transform: scale(1.12); }
+
+.tarjeta svg {
+    width: 100%;
+    height: 100%;
+    fill: none;
+    stroke: black;
+    stroke-width: 1.5;
+    transition: fill 0.2s, stroke 0.2s;
+}
+.tarjeta > button[aria-pressed="true"] svg { fill: #E8383D; stroke: #E8383D; }
+
+/* Parte de abajo: Agregar, o Seleccionado + cantidad */
+.tarjeta footer { display: flex; justify-content: center; align-items: center; gap: 8px; }
+.tarjeta footer .boton { font-size: 14px; }
+.tarjeta footer b { font-size: 16px; }
+.tarjeta footer div { display: flex; flex-direction: column; }
+.tarjeta footer div button { font-size: 10px; line-height: 1.1; color: #8B1A1A; }
+
+@media (max-width: 650px) {
+    .lista { padding: 25px 15px 10px; }
+    .tarjeta { flex-basis: 145px; }
+}

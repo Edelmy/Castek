@@ -1,0 +1,25 @@
+.historial {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 30px;
+    padding: 45px 25px 25px;
+}
+
+.historial section { flex: 1; min-width: 300px; }
+
+.historial h2 {
+    margin-bottom: 8px;
+    text-align: center;
+    font-size: 28px;
+    font-weight: 600;
+}
+
+.historial table {
+    border-collapse: separate;
+    border-spacing: 0;
+    border-radius: 14px;
+    overflow: hidden;
+}
+
+.historial .relleno { height: 150px; }
