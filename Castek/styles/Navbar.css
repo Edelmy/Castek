@@ -120,3 +120,27 @@ th { border-bottom: 1px solid black; font-weight: 500; }
     .barra-menu div a { font-size: 12px; }
     .barra-menu div img { width: 15px; height: 15px; }
 }
+
+/* ---------- FLECHA FLOTANTE DE REGRESO ---------- */
+.flecha-volver {
+    position: fixed;
+    left: 18px;
+    bottom: 22px;
+    z-index: 50;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    border-radius: 30px;
+    background: var(--cafe);
+    color: white;
+    font-weight: 600;
+    text-decoration: none;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, .3);
+}
+.flecha-volver span { font-size: 22px; line-height: 1; }
+.flecha-volver small { font-size: 14px; }
+.flecha-volver:hover { background: #8a4a33; }
+
+/* en pantallas chicas solo se ve la flecha */
+@media (max-width: 600px) { .flecha-volver small { display: none; } }

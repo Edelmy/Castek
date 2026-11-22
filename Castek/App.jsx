@@ -128,7 +128,7 @@ export default function App() {
         <Route path="/vendedor" element={<Navigate to="/vendedor/registrar" replace />} />
         <Route path="/vendedor/registrar" element={vendedor(<RegistrarCompra />)} />
         <Route path="/vendedor/pedidos" element={vendedor(<PedidosVendedor />)} />
-        <Route path="/vendedor/recibo" element={vendedor(<ReciboVendedor />)} />
+        <Route path="/vendedor/recibo/:id" element={vendedor(<ReciboVendedor />)} />
         <Route path="/vendedor/ventas" element={vendedor(<Ventas />)} />
 
         {/* Vista del Administrador */}
@@ -137,7 +137,7 @@ export default function App() {
         <Route path="/admin/pedidos" element={admin(<PedidosVendedor rol="admin" />)} />
         <Route path="/admin/ventas" element={admin(<Ventas rol="admin" />)} />
         <Route path="/admin/registrar" element={admin(<RegistrarCompra rol="admin" />)} />
-        <Route path="/admin/recibo" element={admin(<ReciboVendedor rol="admin" />)} />
+        <Route path="/admin/recibo/:id" element={admin(<ReciboVendedor rol="admin" />)} />
         <Route path="/admin/clientes" element={admin(<Clientes />)} />
         <Route path="/admin/usuarios" element={admin(<Usuarios />)} />
         <Route path="/admin/gastos" element={admin(<Gastos />)} />

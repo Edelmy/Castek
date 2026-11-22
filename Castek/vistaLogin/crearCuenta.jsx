@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { pedir } from "../api";
+import FlechaVolver from "../components/FlechaVolver";
 import "../styles/registro.css";
 import "../styles/login.css";
 
@@ -23,6 +24,7 @@ export default function CrearCuenta() {
 
   return (
     <>
+      <FlechaVolver to="/login" texto="Volver al inicio de sesión" />
       <header className="barra-cafe" />
       <nav className="barra-menu">
         <span className="logo">Castek<i>Sweet♡</i></span>

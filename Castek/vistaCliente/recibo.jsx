@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import Navbar from "../components/Navbar";
+import FlechaVolver from "../components/FlechaVolver";
 import { pedir } from "../api";
 import "../styles/recibo.css";
 
@@ -17,6 +18,7 @@ export default function Recibo() {
     return (
       <>
         <Navbar />
+      <FlechaVolver to="/menu" texto="Volver al menú" />
         <main className="recibo"><p>{error}</p><Link className="boton" to="/menu">Volver al menú</Link></main>
       </>
     );
@@ -26,6 +28,7 @@ export default function Recibo() {
   return (
     <>
       <Navbar />
+      <FlechaVolver to="/menu" texto="Volver al menú" />
       <main className="recibo">
 
         <header>

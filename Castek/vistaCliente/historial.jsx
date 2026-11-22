@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import Navbar from "../components/Navbar";
+import FlechaVolver from "../components/FlechaVolver";
 import { pedir } from "../api";
 import { Perfil, usePerfil } from "./registro";
 import "../styles/registro.css";
@@ -17,6 +18,7 @@ export default function Historial() {
   return (
     <>
       <Navbar />
+      <FlechaVolver to="/menu" texto="Volver al menú" />
       <main className="historial">
         <div>
           {datos && <Perfil boton="Actualizar" datos={datos} onGuardar={guardar} />}

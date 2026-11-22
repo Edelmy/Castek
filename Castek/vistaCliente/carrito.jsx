@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
+import FlechaVolver from "../components/FlechaVolver";
 import { pedir } from "../api";
 import { usePerfil } from "./registro";
 import "../styles/carrito.css";
@@ -43,6 +44,7 @@ export default function Carrito({ carrito, poner, productos, vaciar, recargar })
   return (
     <>
       <Navbar />
+      <FlechaVolver to="/menu" texto="Volver al menú" />
       <main className="pedido">
 
         <form onSubmit={(e) => e.preventDefault()}>

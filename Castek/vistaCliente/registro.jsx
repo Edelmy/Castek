@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import Navbar from "../components/Navbar";
+import FlechaVolver from "../components/FlechaVolver";
 import { SERVIDOR, pedir } from "../api";
 import "../styles/registro.css";
 
@@ -94,6 +95,7 @@ export default function Registro() {
   return (
     <>
       <Navbar />
+      <FlechaVolver to="/menu" texto="Volver al menú" />
       <main className="registro">
         {datos && <Perfil boton="Guardar" datos={datos} onGuardar={guardar} />}
         {aviso && <p className="aviso">{aviso}</p>}
