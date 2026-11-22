@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { API } from "../api";
 import "../styles/registro.css"; // el diseño de la tarjeta (el mismo que usa Registro)
 import "../styles/login.css";
@@ -63,6 +64,7 @@ export default function Login({ alEntrar }) {
 
           <button className="boton" type="submit">Ingresar</button>
           {error && <p className="error">{error}</p>}
+          <Link to="/crear-cuenta">¿Eres cliente nuevo? Crea tu cuenta</Link>
         </form>
 
         <img src="/imagenes/texto.png" alt="" />

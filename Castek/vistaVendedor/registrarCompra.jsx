@@ -5,10 +5,27 @@ import { productosEjemplo as productos } from "../vistaCliente/menu";
 import "../styles/menu.css";
 import "../styles/vendedor.css";
 
-const agotados = [3]; // id sin existencia para mostrar diseño
+const agotados = [3];
 
-// Barras y menú lateral
-export function Layout({ titulo, children }) {
+const menus = {
+  vendedor: [
+    ["Registrar Compra", "/vendedor/registrar", "/imagenes/caja.png"],
+    ["Ventas", "/vendedor/ventas", "/imagenes/ventas.png"],
+    ["Pedidos", "/vendedor/pedidos", "/imagenes/bolsa.png"],
+  ],
+  admin: [
+    ["Productos", "/admin/productos", "/imagenes/productos.png"],
+    ["Pedidos", "/admin/pedidos", "/imagenes/bolsa.png"],
+    ["Ventas", "/admin/ventas", "/imagenes/ventas.png"],
+    ["Clientes", "/admin/clientes", "/imagenes/usuario.png"],
+    ["Usuarios", "/admin/usuarios", "/imagenes/usuarios.png"],
+    ["Gastos", "/admin/gastos", "/imagenes/gastos.png"],
+    ["Caja", "/admin/caja", "/imagenes/caja.png"],
+    ["Reportes", "/admin/reportes", "/imagenes/reportes.png"],
+  ],
+};
+
+export function Layout({ titulo, rol = "vendedor", children }) {
   return (
     <div className="vendedor">
       <header><h1>{titulo}</h1></header>
@@ -20,13 +37,12 @@ export function Layout({ titulo, children }) {
 
       <div className="cuerpo">
         <aside>
-          <NavLink to="/vendedor/registrar">
-            <img src="/imagenes/caja.png" alt="" />Registrar Compra
-          </NavLink>
-          <NavLink to="/vendedor/pedidos">
-            <img src="/imagenes/bolsa.png" alt="" />Pedidos
-          </NavLink>
-          {/* Cierra la sesión de verdad (avisa a Flask), no solo cambia de página */}
+          {menus[rol].map(([texto, ruta, icono]) => (
+            <NavLink key={ruta} to={ruta}>
+              <img src={icono} alt="" />
+              {texto}
+            </NavLink>
+          ))}
           <BotonSalir className="boton">Cerrar Sesión</BotonSalir>
         </aside>
 
@@ -36,10 +52,9 @@ export function Layout({ titulo, children }) {
   );
 }
 
-// Fecha de hoy en formato AAAA-MM-DD (hora local)
 const hoy = new Date().toLocaleDateString("sv-SE");
 
-export default function RegistrarCompra() {
+export default function RegistrarCompra({ rol = "vendedor" }) {
   const [venta, setVenta] = useState({});
   const [recibio, setRecibio] = useState("");
 
@@ -53,7 +68,7 @@ export default function RegistrarCompra() {
   const faltante = total > 0 && recibido < total;
 
   return (
-    <Layout titulo="Registrar Compra">
+    <Layout titulo="Registrar Compra" rol={rol}>
       <section className="venta">
 
         <div className="productos">
@@ -93,12 +108,7 @@ export default function RegistrarCompra() {
 
           <label>
             Recibió:
-            <input
-              type="number"
-              min="0"
-              value={recibio}
-              onChange={(e) => setRecibio(e.target.value)}
-            />
+            <input type="number" min="0" value={recibio} onChange={(e) => setRecibio(e.target.value)} />
           </label>
 
           <p>Cambio: <b>${cambio.toFixed(2)}</b></p>
@@ -109,7 +119,7 @@ export default function RegistrarCompra() {
             <textarea rows="3" placeholder="Detalles especiales del pedido" />
           </label>
 
-          <Link className="boton" to="/vendedor/recibo">Realizar venta</Link>
+          <Link className="boton" to={`/${rol}/recibo`}>Realizar venta</Link>
         </form>
 
       </section>

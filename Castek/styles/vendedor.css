@@ -96,3 +96,16 @@
 @media (max-width: 800px) {
     .venta { grid-template-columns: 1fr; }
 }
+
+.cuerpo td button {
+    margin: 0 4px;
+    padding: 4px 14px;
+    border-radius: 20px;
+    background: #E8C9B5;
+    font-size: 14px;
+    transition: filter 0.2s;
+}
+.cuerpo td button:hover { filter: brightness(0.9); }
+.cuerpo td button.peligro { background: #E8383D; color: white; }
+.cuerpo td button[aria-pressed="false"] { background: #ddd; color: #8B1A1A; }
+.cuerpo td select { padding: 3px 8px; font-size: 14px; }

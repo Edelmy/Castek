@@ -4,7 +4,7 @@ import "../styles/menu.css";
 import "../styles/favoritos.css";
 
 export default function Favoritos(props) {
-  const lista = props.productos.filter((p) => props.favoritos.includes(p.id));
+  const lista = props.productos.filter((p) => props.favoritos.includes(p.id_prod));
 
   return (
     <>

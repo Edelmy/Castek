@@ -16,11 +16,6 @@ export default function Navbar() {
         <button aria-label="Buscar">
           <img src="/imagenes/buscar.png" alt="" />
         </button>
-        <button>
-          <img src="/imagenes/recoger.png" alt="" />
-          Recoger
-        </button>
-        <BotonSalir />
       </header>
 
       <nav className="barra-menu">
@@ -38,6 +33,8 @@ export default function Navbar() {
         <Link to="/registro" aria-label="Usuario">
           <img src="/imagenes/usuario.png" alt="" />
         </Link>
+
+        <BotonSalir />
       </nav>
     </>
   );

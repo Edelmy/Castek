@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@500;600;700&family=Cormorant+Garamond:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@500;600;700&family=Cormorant+Garamond:wght@400;500;600;700&family=EB+Garamond:wght@400;500;600;700&display=swap');
 
 :root {
     --cafe: #A65E43;
@@ -13,7 +13,8 @@
 body {
     min-height: 100vh;
     background: #F5E9DE;
-    font-family: 'Cormorant Garamond', serif;
+    font-family: 'EB Garamond', serif;
+    font-weight: 500;
 }
 
 img { display: block; max-width: 100%; }
@@ -84,7 +85,7 @@ th { border-bottom: 1px solid black; font-weight: 500; }
     background: var(--beige);
 }
 
-.logo { font-size: 23px; white-space: nowrap; }
+.logo { font-family: 'Cormorant Garamond', serif; font-weight: 400; font-size: 23px; white-space: nowrap; }
 .logo i { font-family: 'Dancing Script', cursive; font-style: normal; }
 
 .barra-menu div { display: flex; gap: 25px; height: 100%; }

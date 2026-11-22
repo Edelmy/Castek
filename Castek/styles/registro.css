@@ -1,4 +1,3 @@
-/* Tarjeta de perfil */
 .perfil {
     position: relative;
     width: 270px;
@@ -28,7 +27,20 @@
 
 .perfil .boton { align-self: center; background: var(--cafe); }
 
-/* Página de registro */
+.perfil textarea {
+    padding: 8px 14px;
+    border: none;
+    border-radius: 16px;
+    background: white;
+    font: inherit;
+    resize: vertical;
+    outline: none;
+}
+
+.perfil input[type="file"] { padding: 6px 12px; font-size: 14px; }
+
+
+
 .registro {
     display: flex;
     flex-direction: column;
@@ -37,27 +49,76 @@
     padding: 45px 10px 30px;
 }
 
-.registro .perfil { width: 330px; }
-
-
-.login .perfil {
-    width: 440px;
-    gap: 22px;
-    padding: 75px 40px 30px;
-    border-radius: 50% 50% 10px 10px / 100px 100px 10px 10px;
-}
-.login .perfil svg { width: 76px; top: -38px; }
-.login .perfil label { grid-template-columns: 150px 1fr; font-size: 21px; }
-.login .perfil input { padding: 9px 16px; font-size: 18px; }
-.login .perfil .boton { padding: 9px 32px; font-size: 19px; }
-.login > img { max-width: 900px; }
-
-@media (max-width: 650px) {
-    .login .perfil { width: 100%; }
-    .login .perfil label { grid-template-columns: 1fr; font-size: 18px; }
-}
+.registro .perfil:not(.largo) { width: 330px; }
 
 .registro > img {
     width: 100%;
     max-width: 800px;
 }
+
+.registro .aviso {
+    color: var(--cafe);
+    font-size: 20px;
+    font-weight: 600;
+}
+
+
+.perfil.largo {
+    width: 100%;
+    max-width: 620px;
+    gap: 14px;
+    padding: 60px 30px 24px;
+    border-radius: 50% 50% 12px 12px / 70px 70px 12px 12px;
+}
+
+.perfil.largo h3 {
+    padding-bottom: 3px;
+    border-bottom: 1px solid #D9A48F;
+    color: var(--cafe);
+    font-size: 19px;
+}
+
+.perfil.largo .doble {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.perfil.largo label {
+    grid-template-columns: 1fr;
+    gap: 4px;
+    font-size: 16px;
+}
+
+.perfil.largo :is(input, textarea) { text-align: left; }
+
+.vista-previa {
+    width: 100%;
+    max-height: 200px;
+    object-fit: cover;
+    border-radius: 12px;
+}
+
+
+.registro.login .perfil {
+    width: 100%;
+    max-width: 440px;
+    gap: 22px;
+    padding: 75px 40px 30px;
+    border-radius: 50% 50% 10px 10px / 100px 100px 10px 10px;
+}
+.registro.login .perfil svg { width: 76px; top: -38px; }
+.registro.login .perfil label { grid-template-columns: 140px 1fr; font-size: 21px; }
+.registro.login .perfil input { min-width: 0; padding: 9px 16px; font-size: 18px; }
+.registro.login .perfil .boton { padding: 9px 32px; font-size: 19px; }
+.registro.login > img { max-width: 900px; }
+
+/* Ajuste en vista movil */
+
+@media (max-width: 650px) {
+    .perfil.largo .doble { grid-template-columns: 1fr; }
+    .registro.login .perfil label { grid-template-columns: 1fr; font-size: 18px; }
+}
+
+/* Mensaje de error de los formularios */
+.registro .error-texto { color: var(--rojo); }

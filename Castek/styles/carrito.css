@@ -71,3 +71,6 @@
 @media (max-width: 650px) {
     .pedido form { width: 100%; }
 }
+
+.pedido .error-pedido { color: var(--rojo); font-weight: 600; text-align: right; }
+.pedido .boton:disabled { opacity: 0.5; cursor: not-allowed; }

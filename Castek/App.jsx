@@ -1,11 +1,19 @@
 import { useState, useEffect } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 
-import { API } from "./api";
+import { API, pedir } from "./api";
 import Login from "./vistaLogin/login";
-import Administrador from "./vistaAdministrador/administrador";
+import CrearCuenta from "./vistaLogin/crearCuenta";
 import RegistrarCompra from "./vistaVendedor/registrarCompra";
 import PedidosVendedor from "./vistaVendedor/pedidos";
+import Ventas from "./vistaVendedor/ventas";
+
+import AdminProductos from "./vistaAdmin/productos";
+import Clientes from "./vistaAdmin/clientes";
+import Usuarios from "./vistaAdmin/usuarios";
+import Gastos from "./vistaAdmin/gastos";
+import Caja from "./vistaAdmin/caja";
+import Reportes from "./vistaAdmin/reportes";
 import ReciboVendedor from "./vistaVendedor/reciboVendedor";
 
 import Nosotros from "./vistaCliente/nosotros";
@@ -20,7 +28,7 @@ import Recibo from "./vistaCliente/recibo";
 // Los nombres deben ser iguales a los de la tabla "rol" en PostgreSQL.
 const inicioDe = {
   Cliente: "/nosotros",
-  Administrador: "/administrador",
+  Administrador: "/admin/productos",
   Vendedor: "/vendedor/registrar",
 };
 
@@ -34,7 +42,7 @@ function Protegida({ sesion, rol, children }) {
 }
 
 export default function App() {
-  const [favoritos, setFavoritos] = useState([]); // [ids]
+  const [favoritos, setFavoritos] = useState([]); // [id de producto]
   const [carrito, setCarrito] = useState({});     // { id: cantidad }
 
   // Quién tiene la sesión abierta: null (nadie) o { usuario, rol }
@@ -52,16 +60,26 @@ export default function App() {
 
   // Productos que vienen de PostgreSQL (se piden cuando alguien entra como Cliente)
   const [productos, setProductos] = useState([]);
+  const recargar = () =>
+    pedir("/productos").then(({ ok, datos }) =>
+      setProductos(ok ? datos.map((p) => ({ ...p, imagen: imagenDe(p.nombre) })) : [])
+    );
+
+  // Al entrar un Cliente se cargan sus productos y sus favoritos guardados
   useEffect(() => {
     if (sesion?.rol !== "Cliente") return;
-    fetch(`${API}/productos`, { credentials: "include" })
-      .then((r) => (r.ok ? r.json() : []))
-      .then((lista) => setProductos(lista.map((p) => ({ ...p, imagen: imagenDe(p.nombre) }))))
-      .catch(() => setProductos([]));
+    recargar();
+    pedir("/favoritos").then(({ ok, datos }) => ok && setFavoritos(datos));
   }, [sesion]);
 
-  const toggleFavorito = (id) =>
-    setFavoritos((f) => (f.includes(id) ? f.filter((x) => x !== id) : [...f, id]));
+  // Corazón del menú: se cambia en pantalla y se guarda en la base (id = id del producto)
+  const toggleFavorito = (id_prod) => {
+    const activo = !favoritos.includes(id_prod);
+    setFavoritos((f) => (activo ? [...f, id_prod] : f.filter((x) => x !== id_prod)));
+    pedir(`/favoritos/${id_prod}`, "PUT", { activo }).then(({ ok }) => {
+      if (!ok) setFavoritos((f) => (activo ? f.filter((x) => x !== id_prod) : [...f, id_prod])); // si falló, se deshace
+    });
+  };
 
   // Fija la cantidad; con 0 o menos quita el producto
   const poner = (id, cantidad) =>
@@ -70,8 +88,9 @@ export default function App() {
       if (cantidad <= 0) delete nuevo[id];
       return nuevo;
     });
+  const vaciar = () => setCarrito({});
 
-  const tienda = { productos, favoritos, carrito, toggleFavorito, poner };
+  const tienda = { productos, favoritos, carrito, toggleFavorito, poner, vaciar, recargar };
 
   // Atajo: envuelve una pantalla para que solo la vea un Cliente
   const cliente = (pantalla) => (
@@ -81,6 +100,11 @@ export default function App() {
   // Igual, para las pantallas del Vendedor
   const vendedor = (pantalla) => (
     <Protegida sesion={sesion} rol="Vendedor">{pantalla}</Protegida>
+  );
+
+  // Igual, para las pantallas del Administrador
+  const admin = (pantalla) => (
+    <Protegida sesion={sesion} rol="Administrador">{pantalla}</Protegida>
   );
 
   // Hasta saber si hay sesión, no se muestra nada (evita un parpadeo del login)
@@ -98,21 +122,27 @@ export default function App() {
           element={destino ? <Navigate to={destino} replace /> : <Login alEntrar={setSesion} />}
         />
 
-        {/* Administrador (por ahora panel vacío) */}
-        <Route
-          path="/administrador"
-          element={
-            <Protegida sesion={sesion} rol="Administrador">
-              <Administrador sesion={sesion} />
-            </Protegida>
-          }
-        />
+        <Route path="/crear-cuenta" element={destino ? <Navigate to={destino} replace /> : <CrearCuenta />} />
 
         {/* Vista del Vendedor (pantallas con datos de ejemplo por ahora) */}
         <Route path="/vendedor" element={<Navigate to="/vendedor/registrar" replace />} />
         <Route path="/vendedor/registrar" element={vendedor(<RegistrarCompra />)} />
         <Route path="/vendedor/pedidos" element={vendedor(<PedidosVendedor />)} />
         <Route path="/vendedor/recibo" element={vendedor(<ReciboVendedor />)} />
+        <Route path="/vendedor/ventas" element={vendedor(<Ventas />)} />
+
+        {/* Vista del Administrador */}
+        <Route path="/administrador" element={<Navigate to="/admin/productos" replace />} />
+        <Route path="/admin/productos" element={admin(<AdminProductos />)} />
+        <Route path="/admin/pedidos" element={admin(<PedidosVendedor rol="admin" />)} />
+        <Route path="/admin/ventas" element={admin(<Ventas rol="admin" />)} />
+        <Route path="/admin/registrar" element={admin(<RegistrarCompra rol="admin" />)} />
+        <Route path="/admin/recibo" element={admin(<ReciboVendedor rol="admin" />)} />
+        <Route path="/admin/clientes" element={admin(<Clientes />)} />
+        <Route path="/admin/usuarios" element={admin(<Usuarios />)} />
+        <Route path="/admin/gastos" element={admin(<Gastos />)} />
+        <Route path="/admin/caja" element={admin(<Caja />)} />
+        <Route path="/admin/reportes" element={admin(<Reportes />)} />
 
         {/* Vista del Cliente: las mismas pantallas de antes, ahora protegidas */}
         <Route path="/nosotros" element={cliente(<Nosotros />)} />
@@ -121,7 +151,8 @@ export default function App() {
         <Route path="/favoritos" element={cliente(<Favoritos {...tienda} />)} />
         <Route path="/registro" element={cliente(<Registro />)} />
         <Route path="/historial" element={cliente(<Historial />)} />
-        <Route path="/recibo" element={cliente(<Recibo />)} />
+        <Route path="/recibo/:id" element={cliente(<Recibo />)} />
+        <Route path="/recibo" element={<Navigate to="/historial" replace />} />
 
         {/* Cualquier otra dirección */}
         <Route path="*" element={<Navigate to="/login" replace />} />

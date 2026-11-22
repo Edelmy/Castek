@@ -2,10 +2,9 @@ import { Link } from "react-router-dom";
 import { Layout } from "./registrarCompra";
 import "../styles/recibo.css";
 
-export default function ReciboVendedor() {
+export default function ReciboVendedor({ rol = "vendedor" }) {
   return (
-    <Layout titulo="Recibo">
-      <section className="recibo">
+    <Layout titulo="Recibo" rol={rol}>
 
         <header>
           <img src="/imagenes/cupcake.png" alt="" />
@@ -35,8 +34,8 @@ export default function ReciboVendedor() {
 
         <p>¡Gracias por su compra!</p>
 
-        <Link className="boton" to="/vendedor/registrar">Nueva venta</Link>
-      </section>
+        
+      <Link className="boton" to={`/${rol}/registrar`}>Nueva venta</Link>
     </Layout>
   );
 }
