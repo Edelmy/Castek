@@ -1,5 +1,5 @@
 // Dirección de Flask. Si algún día cambia el puerto, solo se cambia aquí.
-export const SERVIDOR = "http://localhost:5000";
+export const SERVIDOR = "";   // vacío = mismo sitio; Vite reenvía /api a Flask (ver vite.config.js)
 export const API = `${SERVIDOR}/api`;
 
 // Atajo para hablar con Flask. Siempre manda la cookie de sesión.

@@ -636,6 +636,20 @@ def gestion_pedidos():
         (estatus, estatus),
     )
     filas = cur.fetchall()
+
+    # Qué lleva cada pedido (una sola consulta para todos los pedidos de la lista)
+    items = {}
+    if filas:
+        cur.execute(
+            """SELECT dp.id_ped, dp.cantidad, pr.nom_prod, tv.nom_tipo_venta
+               FROM detallepedido dp
+               JOIN producto pr  ON pr.id_prod = dp.id_prod
+               JOIN tipoventa tv ON tv.id_tipo_venta = dp.id_tipo_venta
+               WHERE dp.id_ped = ANY(%s) ORDER BY dp.id_ped, pr.nom_prod""",
+            ([f[0] for f in filas],),
+        )
+        for id_ped, cant, nombre, tipo in cur.fetchall():
+            items.setdefault(id_ped, []).append({'cantidad': cant, 'producto': nombre, 'presentacion': tipo})
     conn.close()
 
     def direccion(f):
@@ -645,7 +659,8 @@ def gestion_pedidos():
     return jsonify([
         {'id_ped': f[0], 'cliente': f'{f[1]} {f[2] or ""}'.strip(), 'telefono': f[3], 'tipo_entrega': f[4],
          'fecha_entrega': f[5].strftime('%d/%m/%Y'), 'total': float(f[6]), 'estatus': f[7], 'danado': f[8],
-         'observaciones': f[9], 'direccion': direccion(f) if f[4] == 'domicilio' else None, 'ubicacion': f[13]}
+         'observaciones': f[9], 'direccion': direccion(f) if f[4] == 'domicilio' else None, 'ubicacion': f[13],
+         'productos': items.get(f[0], [])}
         for f in filas
     ])
 
@@ -657,9 +672,15 @@ def gestion_pedido_estatus(id_ped):
     nuevo, actual = d.get('estatus'), d.get('actual')
     if nuevo not in ESTATUS or actual not in ESTATUS:
         return jsonify(error='Estatus no válido'), 400
+    pago = d.get('metodo_pago') or 'efectivo'
+    if nuevo == 'entregado' and pago not in ('efectivo', 'transferencia'):
+        return jsonify(error='Método de pago no válido'), 400
     conn = conexion_de_sesion()
     cur = conn.cursor()
     try:
+        # Al pasar a "entregado" el trigger t_pedido_a_venta crea la venta y lee el método de pago
+        # de esta variable (true = solo vale dentro de esta transacción).
+        cur.execute("SELECT set_config('app.metodo_pago', %s, true)", (pago,))
         # "AND estatus = actual": si otra persona ya lo cambió, este cambio no pisa el suyo.
         # El trigger devuelve el stock al cancelar / no entregar (salvo que esté dañado).
         cur.execute(

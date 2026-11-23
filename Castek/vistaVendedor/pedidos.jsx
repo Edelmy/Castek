@@ -16,6 +16,7 @@ export default function Pedidos({ rol = "vendedor" }) {
   const [filtro, setFiltro] = useState("");        // "" = todos
   const [pedidos, setPedidos] = useState([]);
   const [error, setError] = useState("");
+  const [cobrando, setCobrando] = useState(null);  // pedido que se va a marcar como entregado (pide el método de pago)
 
   const cargar = useCallback(async () => {
     const { ok, datos } = await pedir(`/gestion/pedidos?estatus=${filtro}`);
@@ -28,15 +29,17 @@ export default function Pedidos({ rol = "vendedor" }) {
     return () => clearInterval(reloj);
   }, [cargar]);
 
-  async function cambiar(p, nuevo) {
+  async function cambiar(p, nuevo, metodo_pago) {
     if (nuevo === p.estatus) return;
+    // Al entregar se crea la venta: primero se pregunta cómo pagó
+    if (nuevo === "entregado" && !metodo_pago) return setCobrando(p);
     let danado = null;
     if (nuevo === "cancelado" && !window.confirm(`¿Cancelar el pedido ${p.id_ped}? Los productos regresan al inventario.`)) return;
     if (nuevo === "no_entregado") {
       // Si el producto se dañó NO regresa al inventario
       danado = window.confirm("¿El producto se dañó?\nAceptar = sí (NO regresa al inventario)\nCancelar = no (regresa al inventario)");
     }
-    const { ok, datos } = await pedir(`/gestion/pedidos/${p.id_ped}/estatus`, "PUT", { estatus: nuevo, actual: p.estatus, danado });
+    const { ok, datos } = await pedir(`/gestion/pedidos/${p.id_ped}/estatus`, "PUT", { estatus: nuevo, actual: p.estatus, danado, metodo_pago });
     if (!ok) setError(datos.error);
     cargar();
   }
@@ -53,10 +56,24 @@ export default function Pedidos({ rol = "vendedor" }) {
       </div>
       {error && <p className="msj">{error}</p>}
 
+      {cobrando && (
+        <div className="fondo-modal">
+          <div className="modal">
+            <p>Pedido #{cobrando.id_ped} entregado: ${cobrando.total.toFixed(2)}<br />¿Cómo pagó el cliente?</p>
+            {["efectivo", "transferencia"].map((m) => (
+              <button key={m} className="boton" onClick={() => { const p = cobrando; setCobrando(null); cambiar(p, "entregado", m); }}>
+                {m === "efectivo" ? "Efectivo" : "Transferencia"}
+              </button>
+            ))}
+            <button onClick={() => setCobrando(null)}>Cancelar</button>
+          </div>
+        </div>
+      )}
+
       <table>
         <thead>
           <tr>
-            <th>N.º pedido</th><th>Cliente</th><th>Entrega</th>
+            <th>N.º pedido</th><th>Cliente</th><th>Productos</th><th>Entrega</th>
             <th>Fecha de entrega</th><th>Total</th><th>Estado</th>
             {rol === "admin" && <th>Acciones</th>}
           </tr>
@@ -66,6 +83,10 @@ export default function Pedidos({ rol = "vendedor" }) {
             <tr key={p.id_ped}>
               <td>#{p.id_ped}</td>
               <td title={p.observaciones || ""}>{p.cliente}<br /><small>{p.telefono}</small></td>
+              <td>
+                {p.productos.map((x, i) => <div key={i}>{x.cantidad} × {x.producto}</div>)}
+                {p.observaciones && <small>Nota: {p.observaciones}</small>}
+              </td>
               <td title={p.direccion || ""}>
                 {p.tipo_entrega === "pickup" ? "PickUp" : "Domicilio"}
                 {p.direccion && <><br /><small>{p.direccion}</small></>}
@@ -88,7 +109,7 @@ export default function Pedidos({ rol = "vendedor" }) {
               )}
             </tr>
           ))}
-          {pedidos.length === 0 && <tr className="relleno"><td colSpan={rol === "admin" ? 7 : 6} /></tr>}
+          {pedidos.length === 0 && <tr className="relleno"><td colSpan={rol === "admin" ? 8 : 7} /></tr>}
         </tbody>
       </table>
     </Layout>
