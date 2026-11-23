@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Layout } from "../vistaVendedor/registrarCompra";
 import { pedir } from "../api";
+import FiltroFechas from "../components/FiltroFechas";
 
 const tipos = {
   caja: "Caja (ingresos, gastos y utilidad por día)",
@@ -24,6 +25,12 @@ export default function Reportes() {
     if (ok) setReporte(datos); else { setReporte(null); setError(datos.error); }
   }
 
+  // El reporte se vuelve a generar solo al cambiar el tipo o las fechas (el botón "Generar" también sirve)
+  useEffect(() => {
+    if (tipo !== "favoritos" && desde > hasta) return;
+    generar();
+  }, [tipo, desde, hasta]);
+
   const formato = (valor, col) => (reporte.dinero.includes(col) ? `$${valor.toFixed(2)}` : valor);
 
   return (
@@ -36,8 +43,7 @@ export default function Reportes() {
         </label>
         {tipo !== "favoritos" && (
           <>
-            <label>Desde <input type="date" value={desde} onChange={(e) => setDesde(e.target.value)} /></label>
-            <label>Hasta <input type="date" value={hasta} onChange={(e) => setHasta(e.target.value)} /></label>
+            <FiltroFechas desde={desde} hasta={hasta} setDesde={setDesde} setHasta={setHasta} />
           </>
         )}
         <button className="boton" onClick={generar}>Generar</button>

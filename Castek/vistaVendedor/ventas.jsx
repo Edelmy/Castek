@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Layout } from "./registrarCompra";
 import { pedir } from "../api";
+import FiltroFechas from "../components/FiltroFechas";
 
 export default function Ventas({ rol = "vendedor" }) {
   const [ventas, setVentas] = useState([]);
@@ -28,10 +29,9 @@ export default function Ventas({ rol = "vendedor" }) {
   return (
     <Layout titulo="Ventas" rol={rol}>
       <div className="herramientas">
-        <label>Desde <input type="date" value={desde} onChange={(e) => setDesde(e.target.value)} /></label>
-        <label>Hasta <input type="date" value={hasta} onChange={(e) => setHasta(e.target.value)} /></label>
         <Link className="boton" to={`/${rol}/registrar`}>Registrar venta</Link>
       </div>
+      <FiltroFechas desde={desde} hasta={hasta} setDesde={setDesde} setHasta={setHasta} cantidad={ventas.length} nombre="ventas" />
       {error && <p className="msj">{error}</p>}
 
       <table>

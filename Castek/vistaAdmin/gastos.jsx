@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useState } from "react";
 import { Layout } from "../vistaVendedor/registrarCompra";
 import { pedir } from "../api";
+import CampoNumero from "../components/CampoNumero";
+import FiltroFechas from "../components/FiltroFechas";
 
 const hoy = new Date().toLocaleDateString("sv-SE");
 
@@ -49,7 +51,7 @@ export default function Gastos() {
             <option value="fijo">Fijo (renta, servicios...)</option>
           </select>
         </label>
-        <label>Monto <input name="monto" type="number" min="0" step="0.01" required /></label>
+        <label>Monto <CampoNumero tipo="decimal" name="monto" required /></label>
         <button className="boton">Registrar gasto</button>
       </form>
       {error && <p className="msj">{error}</p>}
@@ -62,8 +64,7 @@ export default function Gastos() {
             <option value="fijo">Fijos</option>
           </select>
         </label>
-        <label>Desde <input type="date" value={desde} onChange={(e) => setDesde(e.target.value)} /></label>
-        <label>Hasta <input type="date" value={hasta} onChange={(e) => setHasta(e.target.value)} /></label>
+        <FiltroFechas desde={desde} hasta={hasta} setDesde={setDesde} setHasta={setHasta} />
       </div>
 
       <table>

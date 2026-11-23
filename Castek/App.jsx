@@ -58,6 +58,18 @@ export default function App() {
       .finally(() => setCargando(false));
   }, []);
 
+  // Mientras haya sesión, se le avisa a Flask cada 45 s que la pantalla sigue abierta
+  // (así la cuenta se libera sola si cierran la pestaña sin salir). Si Flask ya no la reconoce, vuelve al login.
+  useEffect(() => {
+    if (!sesion) return;
+    const latido = setInterval(() => {
+      fetch(`${API}/me`, { credentials: "include" })
+        .then((r) => { if (r.status === 401) setSesion(null); })
+        .catch(() => {});
+    }, 45000);
+    return () => clearInterval(latido);
+  }, [sesion]);
+
   // Productos que vienen de PostgreSQL (se piden cuando alguien entra como Cliente)
   const [productos, setProductos] = useState([]);
   const recargar = () =>

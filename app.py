@@ -3,6 +3,7 @@ import os
 import shutil
 import subprocess
 import sys
+import threading
 import uuid
 from datetime import date, datetime, time, timedelta
 from functools import wraps
@@ -27,7 +28,6 @@ CORS(app, supports_credentials=True, origins=['http://localhost:5173'])
 
 # Cada rol de la aplicación usa SU cuenta de PostgreSQL. Así la base de datos
 # (y no solo Flask) impide lo que ese rol no puede hacer.
-# Las contraseñas son las que dejó el script 02_roles_privilegios.sql.
 # Si algún día las cambias con ALTER ROLE, ponlas aquí o en variables de entorno.
 HOST, PUERTO, BASE = 'localhost', 5432, 'castekDB'   # dónde está PostgreSQL y cómo se llama la base
 
@@ -68,6 +68,38 @@ def conexion_de_sesion():
     return conn
 
 
+# UNA SESIÓN POR USUARIO
+# Se recuerda en memoria qué cuentas están en uso: { nombre de usuario: {token, visto} }.
+# La pantalla avisa cada ~45 s que sigue abierta; si pasan 3 minutos sin avisos (cerraron la
+# pestaña sin salir) la cuenta se libera sola. Si Flask se reinicia, todos deben entrar de nuevo.
+SESIONES = {}
+CANDADO_SESIONES = threading.Lock()
+LIBERAR_TRAS = timedelta(minutes=3)
+
+
+@app.before_request
+def vigilar_sesion():
+    # Cada petición a /api renueva "visto". Si la sesión de esta cookie ya no es la vigente, se cierra.
+    if 'id' not in session or not request.path.startswith('/api/'):
+        return None
+    with CANDADO_SESIONES:
+        activa = SESIONES.get(session.get('usuario'))
+        if activa is None or activa['token'] != session.get('token'):
+            session.clear()
+        else:
+            activa['visto'] = datetime.now()
+    return None
+
+
+def cerrar_sesiones_de(id_usuario):
+    # Cuando el administrador desactiva a alguien o le cambia la contraseña, su sesión abierta se cierra
+    if id_usuario == session.get('id'):
+        return
+    with CANDADO_SESIONES:
+        for nombre in [n for n, a in SESIONES.items() if a.get('id') == id_usuario]:
+            del SESIONES[nombre]
+
+
 # LOGIN
 @app.post('/api/login')
 def login():
@@ -91,7 +123,22 @@ def login():
     if fila is None or not check_password_hash(fila[2], password):
         return jsonify(error='Usuario o contraseña incorrectos'), 401
 
+    # Si esa cuenta ya está abierta en otro navegador/equipo, no se deja entrar.
+    # (Desde el mismo navegador sí: la cookie trae el mismo token.)
+    with CANDADO_SESIONES:
+        activa = SESIONES.get(fila[1])
+        en_uso = (activa is not None
+                  and datetime.now() - activa['visto'] < LIBERAR_TRAS
+                  and session.get('token') != activa['token'])
+        if en_uso:
+            return jsonify(error='Esta sesión está siendo utilizada por otra persona. '
+                                 'Intenta más tarde o pide que cierre su sesión.'), 409
+        token = uuid.uuid4().hex
+        SESIONES[fila[1]] = {'token': token, 'visto': datetime.now(), 'id': fila[0]}
+
     # Se guarda en la sesión quién es y qué rol tiene.
+    session.clear()
+    session['token'] = token
     session['id'] = fila[0]
     session['usuario'] = fila[1]
     session['rol'] = fila[3]
@@ -112,6 +159,10 @@ def me():
 
 @app.post('/api/logout')
 def logout():
+    with CANDADO_SESIONES:   # libera la cuenta para que otra persona pueda entrar
+        activa = SESIONES.get(session.get('usuario'))
+        if activa and activa['token'] == session.get('token'):
+            del SESIONES[session['usuario']]
     session.clear()
     return jsonify(mensaje='Sesión cerrada')
 
@@ -623,6 +674,11 @@ def gestion_pedidos():
     estatus = request.args.get('estatus') or None    # vacío = todos
     if estatus and estatus not in ESTATUS:
         return jsonify(error='Estatus no válido'), 400
+    try:   # fechas AAAA-MM-DD (opcionales): se filtra por la fecha de ENTREGA
+        desde = date.fromisoformat(request.args['desde']) if request.args.get('desde') else None
+        hasta = date.fromisoformat(request.args['hasta']) if request.args.get('hasta') else None
+    except ValueError:
+        return jsonify(error='Fecha no válida'), 400
     conn = conexion_de_sesion()
     cur = conn.cursor()
     cur.execute(
@@ -632,8 +688,10 @@ def gestion_pedidos():
            JOIN cliente c        ON c.id_client = p.id_client
            LEFT JOIN direccion d ON d.id_direc = c.id_direc
            WHERE (%s::text IS NULL OR p.estatus = %s)
+             AND (%s::date IS NULL OR p.fecha_entrega >= %s::date)
+             AND (%s::date IS NULL OR p.fecha_entrega < %s::date + 1)
            ORDER BY (p.estatus IN ('pendiente', 'en_proceso')) DESC, p.fecha_entrega, p.id_ped""",
-        (estatus, estatus),
+        (estatus, estatus, desde, desde, hasta, hasta),
     )
     filas = cur.fetchall()
 
@@ -990,6 +1048,8 @@ def admin_usuario_estado(id_usuario):
     cur = conn.cursor()
     error = correr(cur, conn, 'UPDATE usuario SET estado = %s WHERE id_usuario = %s', (activo, id_usuario))
     conn.close()
+    if not error and not activo:
+        cerrar_sesiones_de(id_usuario)
     return (jsonify(error=error), 400) if error else jsonify(mensaje='ok')
 
 
@@ -1004,6 +1064,8 @@ def admin_usuario_password(id_usuario):
     error = correr(cur, conn, 'UPDATE usuario SET contrasena = %s WHERE id_usuario = %s',
                    (generate_password_hash(password), id_usuario))
     conn.close()
+    if not error:
+        cerrar_sesiones_de(id_usuario)
     return (jsonify(error=error), 400) if error else jsonify(mensaje='Contraseña restablecida')
 
 

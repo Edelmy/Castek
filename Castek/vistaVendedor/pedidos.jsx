@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { Layout } from "./registrarCompra";
 import { pedir } from "../api";
+import FiltroFechas from "../components/FiltroFechas";
 
 // [valor en la base de datos, texto que se ve]
 const estados = [
@@ -16,12 +17,14 @@ export default function Pedidos({ rol = "vendedor" }) {
   const [filtro, setFiltro] = useState("");        // "" = todos
   const [pedidos, setPedidos] = useState([]);
   const [error, setError] = useState("");
+  const [desde, setDesde] = useState("");
+  const [hasta, setHasta] = useState("");
   const [cobrando, setCobrando] = useState(null);  // pedido que se va a marcar como entregado (pide el método de pago)
 
   const cargar = useCallback(async () => {
-    const { ok, datos } = await pedir(`/gestion/pedidos?estatus=${filtro}`);
+    const { ok, datos } = await pedir(`/gestion/pedidos?estatus=${filtro}&desde=${desde}&hasta=${hasta}`);
     if (ok) { setPedidos(datos); setError(""); } else setError(datos.error);
-  }, [filtro]);
+  }, [filtro, desde, hasta]);
 
   useEffect(() => {
     cargar();
@@ -54,6 +57,7 @@ export default function Pedidos({ rol = "vendedor" }) {
           </button>
         ))}
       </div>
+      <FiltroFechas desde={desde} hasta={hasta} setDesde={setDesde} setHasta={setHasta} cantidad={pedidos.length} nombre="pedidos (por fecha de entrega)" />
       {error && <p className="msj">{error}</p>}
 
       {cobrando && (

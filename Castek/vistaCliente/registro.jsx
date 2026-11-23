@@ -3,6 +3,7 @@ import Navbar from "../components/Navbar";
 import FlechaVolver from "../components/FlechaVolver";
 import { SERVIDOR, pedir } from "../api";
 import "../styles/registro.css";
+import CampoNumero from "../components/CampoNumero";
 
 // Pide los datos del cliente a Flask y sabe guardarlos. Lo usan Registro e Historial.
 export function usePerfil() {
@@ -55,7 +56,7 @@ export function Perfil({ boton, datos, onGuardar }) {
       <div className="doble">
         <label>Nombre <input name="nombre" defaultValue={datos.nombre} required /></label>
         <label>Teléfono
-          <input name="telefono" type="tel" defaultValue={datos.telefono} pattern="[0-9]{10}" title="10 dígitos, solo números" required />
+          <CampoNumero tipo="telefono" name="telefono" defaultValue={datos.telefono} pattern="[0-9]{10}" title="10 dígitos, solo números" required />
         </label>
         <label>Apellido paterno <input name="ap" defaultValue={datos.ap} required /></label>
         <label>Apellido materno <input name="am" defaultValue={datos.am} /></label>

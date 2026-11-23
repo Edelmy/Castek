@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { Layout } from "../vistaVendedor/registrarCompra";
 import { pedir } from "../api";
+import CampoNumero from "../components/CampoNumero";
 
 const vacio = { nombre: "", ap: "", am: "", telefono: "", calle: "", numero: "", cruzamientos: "" };
 
@@ -59,7 +60,7 @@ export default function Clientes() {
           <label>Nombre <input name="nombre" value={form.nombre} onChange={cambiar} required /></label>
           <label>Apellido paterno <input name="ap" value={form.ap} onChange={cambiar} /></label>
           <label>Apellido materno <input name="am" value={form.am} onChange={cambiar} /></label>
-          <label>Teléfono <input name="telefono" value={form.telefono} onChange={cambiar} pattern="[0-9]{10}" title="10 dígitos" /></label>
+          <label>Teléfono <CampoNumero tipo="telefono" name="telefono" value={form.telefono} onChange={cambiar} pattern="[0-9]{10}" title="10 dígitos" /></label>
           <label>Calle <input name="calle" value={form.calle} onChange={cambiar} /></label>
           <label>Núm. <input name="numero" value={form.numero} onChange={cambiar} /></label>
           <label>Cruzamientos <input name="cruzamientos" value={form.cruzamientos} onChange={cambiar} /></label>

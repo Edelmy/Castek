@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { Layout } from "../vistaVendedor/registrarCompra";
 import { pedir } from "../api";
+import CampoNumero from "../components/CampoNumero";
 
 const mesActual = new Date().toLocaleDateString("sv-SE").slice(0, 7); // AAAA-MM
 const dinero = (n) => `$${n.toFixed(2)}`;
@@ -53,7 +54,7 @@ export default function Caja() {
       <section className="cierre">
         <h2>Corte de caja de hoy</h2>
         <form className="herramientas" onSubmit={hacerCorte}>
-          <label>Dinero con el que se abrió la caja <input type="number" min="0" step="0.01" value={inicial} onChange={(e) => setInicial(e.target.value)} /></label>
+          <label>Dinero con el que se abrió la caja <CampoNumero tipo="decimal" value={inicial} onChange={(e) => setInicial(e.target.value)} /></label>
           <label>Observaciones <input value={obs} onChange={(e) => setObs(e.target.value)} /></label>
           <button className="boton">Hacer corte de hoy</button>
         </form>

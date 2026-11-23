@@ -4,6 +4,7 @@ import { pedir } from "../api";
 import FlechaVolver from "../components/FlechaVolver";
 import "../styles/registro.css";
 import "../styles/login.css";
+import CampoNumero from "../components/CampoNumero";
 
 // Los clientes nuevos crean su propia cuenta aquí. Siempre se crea con rol Cliente.
 export default function CrearCuenta() {
@@ -48,7 +49,7 @@ export default function CrearCuenta() {
           <h3>Datos personales</h3>
           <div className="doble">
             <label>Nombre <input name="nombre" required /></label>
-            <label>Teléfono <input name="telefono" type="tel" pattern="[0-9]{10}" title="10 dígitos, solo números" /></label>
+            <label>Teléfono <CampoNumero tipo="telefono" name="telefono" pattern="[0-9]{10}" title="10 dígitos, solo números" /></label>
             <label>Apellido paterno <input name="ap" required /></label>
             <label>Apellido materno <input name="am" /></label>
           </div>

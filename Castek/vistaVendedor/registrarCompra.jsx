@@ -6,6 +6,7 @@ import { pedir } from "../api";
 import { imagenDe } from "../vistaCliente/menu";
 import "../styles/menu.css";
 import "../styles/vendedor.css";
+import CampoNumero from "../components/CampoNumero";
 
 const menus = {
   vendedor: [
@@ -156,7 +157,7 @@ export default function RegistrarCompra({ rol = "vendedor" }) {
             <>
               <label>
                 Recibió:
-                <input type="number" min="0" value={recibio} onChange={(e) => setRecibio(e.target.value)} />
+                <CampoNumero tipo="decimal" value={recibio} onChange={(e) => setRecibio(e.target.value)} />
               </label>
               <p>Cambio: <b>${cambio.toFixed(2)}</b></p>
               {faltante && <small>Faltan ${(total - recibido).toFixed(2)}</small>}

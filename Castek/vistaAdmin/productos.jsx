@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { Layout } from "../vistaVendedor/registrarCompra";
 import { pedir } from "../api";
+import CampoNumero from "../components/CampoNumero";
 
 const vacio = { nombre: "", descripcion: "", id_tipo_venta: "", precio: "", stock: "" };
 
@@ -59,8 +60,8 @@ export default function Productos() {
             {tipos.map((t) => <option key={t.id} value={t.id}>{t.nombre}</option>)}
           </select>
         </label>
-        <label>Precio <input name="precio" type="number" min="0" step="0.01" value={form.precio} onChange={cambiar} required /></label>
-        <label>Existencia <input name="stock" type="number" min="0" value={form.stock} onChange={cambiar} /></label>
+        <label>Precio <CampoNumero tipo="decimal" name="precio" value={form.precio} onChange={cambiar} required /></label>
+        <label>Existencia <CampoNumero tipo="entero" name="stock" value={form.stock} onChange={cambiar} /></label>
         <button className="boton">{editando ? "Guardar cambios" : "Agregar producto"}</button>
         {editando && <button type="button" className="boton" onClick={limpiar}>Cancelar</button>}
       </form>

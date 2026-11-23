@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { Layout } from "../vistaVendedor/registrarCompra";
 import { pedir } from "../api";
+import CampoNumero from "../components/CampoNumero";
 
 const vacio = { nombre: "", ap: "", usuario: "", telefono: "", rol: "Vendedor", password: "" };
 
@@ -57,7 +58,7 @@ export default function Usuarios() {
           <label>Nombre <input name="nombre" value={form.nombre} onChange={cambiar} required /></label>
           <label>Apellido <input name="ap" value={form.ap} onChange={cambiar} required /></label>
           <label>Usuario <input name="usuario" value={form.usuario} onChange={cambiar} required /></label>
-          <label>Teléfono <input name="telefono" value={form.telefono} onChange={cambiar} /></label>
+          <label>Teléfono <CampoNumero tipo="telefono" name="telefono" value={form.telefono} onChange={cambiar} /></label>
           <label>Rol
             <select name="rol" value={form.rol} onChange={cambiar}>
               <option>Vendedor</option>

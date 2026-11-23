@@ -138,3 +138,8 @@
 /* Ventana pequeña para elegir el método de pago al entregar un pedido */
 .fondo-modal { position: fixed; inset: 0; background: rgba(0,0,0,.4); display: flex; align-items: center; justify-content: center; z-index: 50; }
 .modal { background: #fff; padding: 24px; border-radius: 12px; display: flex; flex-direction: column; gap: 10px; text-align: center; min-width: 260px; }
+
+/* Filtro de fechas (Ventas, Pedidos, Gastos, Reportes) */
+.filtro-fechas { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin: 8px 0; }
+.filtro-fechas button { cursor: pointer; padding: 4px 10px; }
+.filtro-fechas button:disabled { opacity: .5; cursor: default; }
