@@ -66,6 +66,12 @@ export default function Recibo() {
         </table>
 
         <p>¡Gracias por tu compra!</p>
+
+        {/* Solo se ve en pantalla: al imprimir el ticket estos botones no salen */}
+        <div className="acciones-ticket no-imprimir">
+          <button className="boton" onClick={() => window.print()}>🖨 Imprimir ticket</button>
+          <Link className="boton" to="/historial">Ver mi historial</Link>
+        </div>
       </main>
     </>
   );

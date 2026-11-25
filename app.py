@@ -14,6 +14,8 @@ from flask import Flask, jsonify, request, send_from_directory, session #jsonify
 from flask_cors import CORS#hace que flask y react se comuniquen apesar de estar en puertos distintos
 from werkzeug.security import check_password_hash, generate_password_hash
 
+from cifrado import cifrar, descifrar   # cifrado de los datos del cliente (ver cifrado.py)
+
 app = Flask(__name__)
 app.secret_key = 'secret_key' # Clave para proteger la sesión (la cookie del usuario)
 app.config['MAX_CONTENT_LENGTH'] = 5 * 1024 * 1024   # las imágenes subidas pueden pesar máximo 5 MB
@@ -32,7 +34,7 @@ CORS(app, supports_credentials=True, origins=['http://localhost:5173'])
 HOST, PUERTO, BASE = 'localhost', 5432, 'castekDB'   # dónde está PostgreSQL y cómo se llama la base
 
 CUENTAS = {
-    'postgres': ('postgres', os.environ.get('PG_CLAVE_POSTGRES', '131313')),   # solo para crear-usuario
+    'postgres': ('postgres', os.environ.get('PG_CLAVE_POSTGRES', '190305-D')),   # solo para crear-usuario
     'auth':     ('castek_auth',     os.environ.get('PG_CLAVE_AUTH',     'CAMBIAR_castek_auth')),
     'Cliente':       ('castek_cliente',  os.environ.get('PG_CLAVE_CLIENTE',  'CAMBIAR_castek_cliente')),
     'Vendedor':      ('castek_vendedor', os.environ.get('PG_CLAVE_VENDEDOR', 'CAMBIAR_castek_vendedor')),
@@ -235,10 +237,10 @@ def registro():
         # La función de la base SIEMPRE crea el usuario con rol Cliente
         cur.execute(
             'SELECT registrar_cliente(%s, %s, %s, %s, %s, %s, %s, %s, %s)',
-            (usuario, generate_password_hash(password), nombre,
-             d.get('ap', '').strip() or None, d.get('am', '').strip() or None,
-             d.get('telefono', '').strip() or None, d.get('calle', '').strip() or None,
-             d.get('numero', '').strip() or None, d.get('cruzamientos', '').strip() or None),
+            (usuario, generate_password_hash(password), cifrar(nombre),
+             cifrar(d.get('ap', '').strip() or None), cifrar(d.get('am', '').strip() or None),
+             cifrar(d.get('telefono', '').strip() or None), cifrar(d.get('calle', '').strip() or None),
+             cifrar(d.get('numero', '').strip() or None), cifrar(d.get('cruzamientos', '').strip() or None)),
         )
         conn.commit()
     except psycopg2.errors.UniqueViolation:
@@ -275,7 +277,7 @@ def perfil_ver():
     if f is None:
         return jsonify(error='Tu cuenta no tiene registro de cliente'), 404
     claves = ['nombre', 'ap', 'am', 'telefono', 'calle', 'numero', 'cruzamientos', 'imagen', 'comentario', 'ubicacion']
-    return jsonify({k: (v or '') for k, v in zip(claves, f)})
+    return jsonify({k: (descifrar(v) or '') for k, v in zip(claves, f)})   # descifra los datos del cliente
 
 
 @app.put('/api/perfil')
@@ -307,8 +309,9 @@ def perfil_guardar():
             return jsonify(error='Tu cuenta no tiene registro de cliente'), 404
         id_client, id_direc = cli
 
-        datos_dir = (calle, f.get('numero', '').strip(), f.get('cruzamientos', '').strip(),
-                     f.get('comentario', '').strip(), f.get('ubicacion', '').strip())
+        # Todo lo que se guarda del domicilio va cifrado (la ruta de la imagen no: es solo un nombre de archivo)
+        datos_dir = (cifrar(calle), cifrar(f.get('numero', '').strip()), cifrar(f.get('cruzamientos', '').strip()),
+                     cifrar(f.get('comentario', '').strip()), cifrar(f.get('ubicacion', '').strip()))
         if id_direc is None:
             cur.execute(
                 """INSERT INTO direccion (calle, numero, cruzamientos, com_ref, link_ubi, ima_ref)
@@ -327,8 +330,8 @@ def perfil_guardar():
 
         cur.execute(
             'UPDATE cliente SET nombre=%s, ap=%s, am=%s, telefono=%s, id_direc=%s WHERE id_client=%s',
-            (nombre, f.get('ap', '').strip() or None, f.get('am', '').strip() or None,
-             f.get('telefono', '').strip() or None, id_direc, id_client),
+            (cifrar(nombre), cifrar(f.get('ap', '').strip() or None), cifrar(f.get('am', '').strip() or None),
+             cifrar(f.get('telefono', '').strip() or None), id_direc, id_client),
         )
         conn.commit()
     except psycopg2.Error as e:
@@ -453,7 +456,7 @@ def pedido_ver(id_ped):
     conn.close()
     return jsonify(
         id_ped=p[0], fecha=p[1].strftime('%d/%m/%Y'), fecha_entrega=p[2].strftime('%d/%m/%Y'),
-        total=float(p[3]), estatus=p[4], tipo_entrega=p[5], cliente=f'{p[6]} {p[7] or ""}'.strip(),
+        total=float(p[3]), estatus=p[4], tipo_entrega=p[5], cliente=f'{descifrar(p[6])} {descifrar(p[7]) or ""}'.strip(),
         detalle=[{'producto': f[0], 'tipo': f[1], 'cantidad': f[2], 'precio': float(f[3]), 'subtotal': float(f[4])} for f in filas],
     )
 
@@ -509,10 +512,12 @@ def clientes_lista():
     # Para elegir al cliente al registrar una venta (si no se elige, es venta de mostrador)
     conn = conexion_de_sesion()
     cur = conn.cursor()
-    cur.execute("SELECT id_client, nombre, ap FROM cliente WHERE estado = TRUE ORDER BY nombre, ap")
+    cur.execute("SELECT id_client, nombre, ap FROM cliente WHERE estado = TRUE")
     filas = cur.fetchall()
     conn.close()
-    return jsonify([{'id': f[0], 'nombre': f'{f[1]} {f[2] or ""}'.strip()} for f in filas])
+    lista = [{'id': f[0], 'nombre': f'{descifrar(f[1])} {descifrar(f[2]) or ""}'.strip()} for f in filas]
+    lista.sort(key=lambda c: c['nombre'].lower())      # se ordena aquí, ya descifrado
+    return jsonify(lista)
 
 
 @app.post('/api/ventas')
@@ -601,7 +606,7 @@ def ventas_lista():
     conn.close()
     return jsonify([
         {'id_venta': f[0], 'fecha': f[1].strftime('%d/%m/%Y %H:%M'), 'total': float(f[2]), 'activa': f[3],
-         'metodo_pago': f[4], 'cliente': f'{f[5]} {f[6] or ""}'.strip() if f[5] else 'Mostrador', 'vendedor': f[7]}
+         'metodo_pago': f[4], 'cliente': f'{descifrar(f[5])} {descifrar(f[6]) or ""}'.strip() if f[5] else 'Mostrador', 'vendedor': f[7]}
         for f in filas
     ])
 
@@ -634,7 +639,7 @@ def venta_ver(id_venta):
     conn.close()
     return jsonify(
         id_venta=v[0], fecha=v[1].strftime('%d/%m/%Y %H:%M'), total=float(v[2]), activa=v[3], metodo_pago=v[4],
-        cliente=f'{v[5]} {v[6] or ""}'.strip() if v[5] else 'Mostrador',
+        cliente=f'{descifrar(v[5])} {descifrar(v[6]) or ""}'.strip() if v[5] else 'Mostrador',
         detalle=[{'producto': f[0], 'tipo': f[1], 'cantidad': f[2], 'precio': float(f[3]), 'subtotal': float(f[4])} for f in filas],
     )
 
@@ -711,13 +716,13 @@ def gestion_pedidos():
     conn.close()
 
     def direccion(f):
-        partes = [f[10], f[11], f[12]]
+        partes = [descifrar(f[10]), descifrar(f[11]), descifrar(f[12])]
         return ', '.join(x for x in partes if x) or None
 
     return jsonify([
-        {'id_ped': f[0], 'cliente': f'{f[1]} {f[2] or ""}'.strip(), 'telefono': f[3], 'tipo_entrega': f[4],
+        {'id_ped': f[0], 'cliente': f'{descifrar(f[1])} {descifrar(f[2]) or ""}'.strip(), 'telefono': descifrar(f[3]), 'tipo_entrega': f[4],
          'fecha_entrega': f[5].strftime('%d/%m/%Y'), 'total': float(f[6]), 'estatus': f[7], 'danado': f[8],
-         'observaciones': f[9], 'direccion': direccion(f) if f[4] == 'domicilio' else None, 'ubicacion': f[13],
+         'observaciones': f[9], 'direccion': direccion(f) if f[4] == 'domicilio' else None, 'ubicacion': descifrar(f[13]),
          'productos': items.get(f[0], [])}
         for f in filas
     ])
@@ -900,25 +905,28 @@ def leer_cliente(f):
 @app.get('/api/admin/clientes')
 @ADMIN
 def admin_clientes():
-    q = '%' + (request.args.get('q') or '').strip() + '%'   # búsqueda: ILIKE con parámetro (sin inyección)
+    q = (request.args.get('q') or '').strip().lower()
     conn = conexion_de_sesion()
     cur = conn.cursor()
+    # Ya no se puede buscar con ILIKE en SQL: los datos están cifrados. Se traen, se descifran
+    # y se filtra/ordena aquí (con pocos cientos de clientes es instantáneo).
     cur.execute(
         """SELECT c.id_client, c.nombre, c.ap, c.am, c.telefono, c.estado, c.id_usuario IS NOT NULL,
                   d.calle, d.numero, d.cruzamientos
-           FROM cliente c LEFT JOIN direccion d ON d.id_direc = c.id_direc
-           WHERE c.nombre ILIKE %s OR COALESCE(c.ap, '') ILIKE %s OR COALESCE(c.telefono, '') ILIKE %s
-           ORDER BY c.estado DESC, c.nombre, c.ap""",
-        (q, q, q),
+           FROM cliente c LEFT JOIN direccion d ON d.id_direc = c.id_direc"""
     )
     filas = cur.fetchall()
     conn.close()
-    return jsonify([
-        {'id': f[0], 'nombre': f[1], 'ap': f[2] or '', 'am': f[3] or '', 'telefono': f[4] or '', 'activo': f[5],
-         'tiene_cuenta': f[6], 'calle': f[7] or '', 'numero': f[8] or '', 'cruzamientos': f[9] or '',
-         'direccion': ', '.join(x for x in (f[7], f[8], f[9]) if x)}
-        for f in filas
-    ])
+    clientes = []
+    for f in filas:
+        nombre, ap, am, tel, calle, numero, cruz = (descifrar(x) or '' for x in (f[1], f[2], f[3], f[4], f[7], f[8], f[9]))
+        if q and not any(q in x.lower() for x in (nombre, ap, tel)):
+            continue
+        clientes.append({'id': f[0], 'nombre': nombre, 'ap': ap, 'am': am, 'telefono': tel, 'activo': f[5],
+                         'tiene_cuenta': f[6], 'calle': calle, 'numero': numero, 'cruzamientos': cruz,
+                         'direccion': ', '.join(x for x in (calle, numero, cruz) if x)})
+    clientes.sort(key=lambda c: (not c['activo'], c['nombre'].lower(), c['ap'].lower()))
+    return jsonify(clientes)
 
 
 @app.post('/api/admin/clientes')
@@ -933,10 +941,10 @@ def admin_cliente_crear():
         id_direc = None
         if d['calle']:
             cur.execute('INSERT INTO direccion (calle, numero, cruzamientos) VALUES (%s, %s, %s) RETURNING id_direc',
-                        (d['calle'], d['numero'], d['cruzamientos']))
+                        (cifrar(d['calle']), cifrar(d['numero']), cifrar(d['cruzamientos'])))
             id_direc = cur.fetchone()[0]
         cur.execute('INSERT INTO cliente (nombre, ap, am, telefono, id_direc) VALUES (%s, %s, %s, %s, %s) RETURNING id_client',
-                    (d['nombre'], d['ap'], d['am'], d['telefono'], id_direc))
+                    (cifrar(d['nombre']), cifrar(d['ap']), cifrar(d['am']), cifrar(d['telefono']), id_direc))
         nuevo = cur.fetchone()[0]
         conn.commit()
     except psycopg2.Error as e:
@@ -963,13 +971,13 @@ def admin_cliente_editar(id_client):
         id_direc = fila[0]
         if d['calle'] and id_direc is None:
             cur.execute('INSERT INTO direccion (calle, numero, cruzamientos) VALUES (%s, %s, %s) RETURNING id_direc',
-                        (d['calle'], d['numero'], d['cruzamientos']))
+                        (cifrar(d['calle']), cifrar(d['numero']), cifrar(d['cruzamientos'])))
             id_direc = cur.fetchone()[0]
         elif d['calle']:
             cur.execute('UPDATE direccion SET calle=%s, numero=%s, cruzamientos=%s WHERE id_direc=%s',
-                        (d['calle'], d['numero'], d['cruzamientos'], id_direc))
+                        (cifrar(d['calle']), cifrar(d['numero']), cifrar(d['cruzamientos']), id_direc))
         cur.execute('UPDATE cliente SET nombre=%s, ap=%s, am=%s, telefono=%s, id_direc=%s WHERE id_client=%s',
-                    (d['nombre'], d['ap'], d['am'], d['telefono'], id_direc, id_client))
+                    (cifrar(d['nombre']), cifrar(d['ap']), cifrar(d['am']), cifrar(d['telefono']), id_direc, id_client))
         conn.commit()
     except psycopg2.Error as e:
         conn.rollback()
@@ -1004,7 +1012,7 @@ def admin_usuarios():
     filas = cur.fetchall()
     conn.close()
     return jsonify([
-        {'id': f[0], 'usuario': f[1], 'nombre': f'{f[2]} {f[3] or ""}'.strip(), 'telefono': f[4] or '',
+        {'id': f[0], 'usuario': f[1], 'nombre': f'{descifrar(f[2])} {descifrar(f[3]) or ""}'.strip(), 'telefono': descifrar(f[4]) or '',
          'rol': f[5], 'activo': f[6], 'soy_yo': f[0] == session['id']}
         for f in filas
     ])
@@ -1286,6 +1294,8 @@ def crear_usuario():
         conn.close()
         return
 
+    if rol == 'Cliente':          # los datos personales del cliente se guardan cifrados
+        nombre, ap = cifrar(nombre), cifrar(ap)
     cur.execute(
         'INSERT INTO usuario (nombre, nom_usua, ap, contrasena, id_rol) VALUES (%s, %s, %s, %s, %s) RETURNING id_usuario',
         (nombre, nom_usua, ap, generate_password_hash(password), fila[0]),   # se guarda el hash, no la contraseña

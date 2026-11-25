@@ -49,9 +49,10 @@ export default function CrearCuenta() {
           <h3>Datos personales</h3>
           <div className="doble">
             <label>Nombre <input name="nombre" required /></label>
-            <label>Teléfono <CampoNumero tipo="telefono" name="telefono" pattern="[0-9]{10}" title="10 dígitos, solo números" /></label>
+
             <label>Apellido paterno <input name="ap" required /></label>
             <label>Apellido materno <input name="am" /></label>
+            <label>Teléfono <CampoNumero tipo="telefono" name="telefono" pattern="[0-9]{10}" title="10 dígitos, solo números" /></label>
           </div>
 
           <h3>Domicilio (opcional)</h3>

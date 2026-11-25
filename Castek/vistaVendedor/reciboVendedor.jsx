@@ -63,7 +63,10 @@ export default function ReciboVendedor({ rol = "vendedor" }) {
         </>
       )}
 
-      <Link className="boton" to={`/${rol}/registrar`}>Nueva venta</Link>
+      <div className="acciones-ticket no-imprimir">
+        {venta && <button className="boton" onClick={() => window.print()}>🖨 Imprimir ticket</button>}
+        <Link className="boton" to={`/${rol}/registrar`}>Nueva venta</Link>
+      </div>
     </Layout>
   );
 }

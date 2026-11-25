@@ -7,6 +7,7 @@ const enlaces = [
   ["Menú", "/menu"],
   ["Pedidos", "/pedidos", "carrito"],
   ["Favoritos", "/favoritos", "corazon"],
+  ["Historial", "/historial"],
 ];
 
 export default function Navbar() {
@@ -14,7 +15,7 @@ export default function Navbar() {
     <>
       <header className="barra-cafe">
         <button aria-label="Buscar">
-          <img src="/imagenes/buscar.png" alt="" />
+          
         </button>
       </header>
 

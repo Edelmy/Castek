@@ -69,3 +69,35 @@
     display: flex; 
     width: fit-content; 
     margin: 18px auto 0; }
+
+/* ---------- Botones debajo del ticket (solo en pantalla) ---------- */
+.acciones-ticket {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 18px;
+}
+.recibo > .acciones-ticket .boton,
+.acciones-ticket .boton { margin: 0; width: fit-content; }
+
+/* ---------- Al imprimir: queda solo el ticket ---------- */
+@media print {
+    .no-imprimir,
+    .barra-cafe, .barra-menu, .flecha-volver,
+    .vendedor > header, .vendedor aside {
+        display: none !important;
+    }
+    body, .vendedor, .vendedor .cuerpo { background: #fff !important; }
+    .vendedor .cuerpo { display: block !important; }
+    .recibo, .vendedor main {
+        max-width: 80mm;          /* ancho de ticket */
+        margin: 0 auto;
+        padding: 0;
+        border: none;
+        background: #fff;
+        box-shadow: none;
+    }
+    .recibo dl { grid-template-columns: 1fr 1fr; }
+    .recibo dd { background: none; text-align: left; }
+}
